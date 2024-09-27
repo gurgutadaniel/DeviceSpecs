@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -5,8 +6,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Device Diagnosis Page</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/mobile-detect/1.4.5/mobile-detect.min.js"></script>
-
     <link rel="stylesheet" href="styles.css"> <!-- Link to your custom CSS file -->
     <style>
         body {
@@ -137,8 +136,6 @@
 
         // Display device specifications
         function displayDeviceSpecs() {
-            const md = new MobileDetect(window.navigator.userAgent);
-            const phoneModel = md.phone() || '';
             const memory = navigator.deviceMemory || 'Unknown';
             const screenResolution = `${window.screen.width} x ${window.screen.height}`;
             const aspectRatio = (window.screen.width / window.screen.height).toFixed(2);
@@ -159,7 +156,6 @@
             const deviceSpecs = `
                 <h2>Device Specification</h2>
                 <p><strong>Device:</strong> ${navigator.platform}</p>
-                <p><strong>Phone Model:</strong> ${phoneModel}</p>
                 <p><strong>OS:</strong> ${navigator.userAgent.split('(')[1].split(')')[0]}</p>
                 <p><strong>GPU:</strong> ${gpuInfo}</p>
                 <p><strong>RAM:</strong> ${memory}GB or more</p>
