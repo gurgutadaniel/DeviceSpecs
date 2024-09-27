@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Device Diagnosis Page</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
+    <link rel="stylesheet" href="styles.css"> <!-- Link to your custom CSS file -->
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f4f9;
+            color: #333;
+            margin: 0;
+            padding: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            box-sizing: border-box;
+        }
+        .container {
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            max-width: 60%;
+            box-sizing: border-box;
+            overflow-x: auto;
+        }
+        h2 {
+            color: #007BFF;
+            border-bottom: 2px solid #007BFF;
+            padding-bottom: 5px;
+        }
+        .details {
+            margin-bottom: 20px;
+        }
+        .details p {
+            margin: 10px 0;
+        }
+        button {
+            padding: 5px 10px; /* Smaller padding */
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            width: auto; /* Auto width */
+            display: block;
+            margin: 20px auto; /* Centered */
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        /* Adjust layout for horizontal display */
+        .row {
+            display: flex;
+            justify-content: space-between;
+        }
+        .col {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ddd;
+            margin: 5px;
+            border-radius: 8px;
+        }
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .row {
+                flex-direction: column;
+            }
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/bowser@2.11.0/es5.js"></script>
+</head>
+<body>
+    <div class="container">
+        <div class="row">
+            <div class="col details" id="network-details"></div>
+            <div class="col details" id="browser-config"></div>
+            <div class="col details" id="device-specs"></div>
+        </div>
+        <button onclick="clearCacheAndCookies()">How To Clear Cache & Cookies</button>
+    </div>
+
+    <script>
+        // Fetch network details and include date, time, and timezone
+        async function fetchNetworkDetails() {
+            try {
+                const response = await fetch('https://ipinfo.io/json?token=c9cd9ce80683e1');
+                const data = await response.json();
+
+                const now = new Date();
+                const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+                const dateString = now.toLocaleDateString();
+                const timeString = now.toLocaleTimeString();
+
+                document.getElementById('network-details').innerHTML = `
+                    <h2>Network</h2>
+                    <p><strong>IP:</strong> ${data.ip}</p>
+                    <p><strong>City:</strong> ${data.city}</p>
+                    <p><strong>Region:</strong> ${data.region}</p>
+                    <p><strong>Country:</strong> ${data.country}</p>
+                    <p><strong>Location:</strong> ${data.loc}</p>
+                    <p><strong>Org:</strong> ${data.org}</p>
+                    <p><strong>Postal:</strong> ${data.postal}</p>
+                    <p><strong>System Timezone:</strong> ${timezone}</p>
+                    <p><strong>Local Date & Time:</strong> ${dateString}, ${timeString}</p>
+
+                `;
+            } catch (error) {
+                console.error('Error fetching network details:', error);
+            }
+        }
+        // Display browser configuration
+        function displayBrowserConfig() {
+            const browser = bowser.getParser(window.navigator.userAgent);
+            const browserInfo = browser.getBrowser();
+            const engineInfo = browser.getEngine();
+
+            const browserConfig = `
+                <h2>Browser Configuration</h2>
+                <p><strong>Browser:</strong> ${browserInfo.name} ${browserInfo.version}</p>
+                <p><strong>Engine:</strong> ${engineInfo.name} ${engineInfo.version}</p>
+                <p><strong>User Agent:</strong> ${navigator.userAgent}</p>
+                <p><strong>Javascript:</strong> ${typeof (eval) !== "undefined" ? "Enabled (v1.5)" : "Disabled"}</p>
+                <p><strong>Local Storage:</strong> ${typeof (Storage) !== "undefined" ? "Enabled" : "Disabled"}</p>
+                <p><strong>Cookies:</strong> ${navigator.cookieEnabled ? "Enabled" : "Disabled"}</p>
+                <p><strong>WebAudio:</strong> ${typeof (AudioContext) !== "undefined" ? "Enabled" : "Disabled"}</p>
+                <p><strong>WebGL:</strong> ${typeof (WebGLRenderingContext) !== "undefined" ? "Enabled" : "Disabled"}</p>
+            `;
+            document.getElementById('browser-config').innerHTML = browserConfig;
+        }
+
+        // Display device specifications
+        function displayDeviceSpecs() {
+            const memory = navigator.deviceMemory || 'Unknown';
+            const screenResolution = `${window.screen.width} x ${window.screen.height}`;
+            const aspectRatio = (window.screen.width / window.screen.height).toFixed(2);
+            const orientation = window.screen.orientation.type.includes('portrait') ? 'Portrait' : 'Landscape';
+
+            let gpuInfo = 'Unknown';
+            if (window.WebGLRenderingContext) {
+                const canvas = document.createElement('canvas');
+                const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+                if (gl) {
+                    const debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
+                    if (debugInfo) {
+                        gpuInfo = gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL);
+                    }
+                }
+            }
+
+            const deviceSpecs = `
+                <h2>Device Specification</h2>
+                <p><strong>Device:</strong> ${navigator.platform}</p>
+                <p><strong>OS:</strong> ${navigator.userAgent.split('(')[1].split(')')[0]}</p>
+                <p><strong>GPU:</strong> ${gpuInfo}</p>
+                <p><strong>RAM:</strong> ${memory}GB or more</p>
+                <p><strong>Screen Resolution:</strong> ${screenResolution}</p>
+                <p><strong>Aspect Ratio:</strong> ${aspectRatio}</p>
+                <p><strong>Orientation:</strong> ${orientation}</p>
+            `;
+            document.getElementById('device-specs').innerHTML = deviceSpecs;
+        }
+
+        // Clear cache and cookies
+        function clearCacheAndCookies() {
+            const browser = bowser.getParser(window.navigator.userAgent);
+            const browserName = browser.getBrowserName();
+            const language = navigator.language || navigator.userLanguage;
+
+            let url = '';
+
+            // Define URLs for clearing cache and cookies instructions
+            switch (browserName) {
+                case 'Chrome':
+                    url = `https://support.google.com/accounts/answer/32050?hl=${language}`;
+                    break;
+                case 'Firefox':
+                    url = `https://support.mozilla.org/kb/how-clear-firefox-cache?redirectslug=clear-cache-firefox&redirectlocale=en-US&hl=${language}`;
+                    break;
+                case 'Safari':
+                    url = `https://support.apple.com/en-gb/guide/safari/sfri11471/mac?hl=${language}`;
+                    break;
+                case 'Edge':
+                    url = `https://support.microsoft.com/help/10607/microsoft-edge-view-delete-browser-history?hl=${language}`;
+                    break;
+                default:
+                    alert('Browser not supported for this function.');
+                    return;
+            }
+
+            window.open(url, '_blank');
+        }
+
+        // Initialize on load
+        window.onload = function () {
+            fetchNetworkDetails();
+            displayBrowserConfig();
+            displayDeviceSpecs();
+        };
+    </script>
+</body>
+</html>
